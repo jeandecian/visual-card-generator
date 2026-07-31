@@ -2,8 +2,319 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Visual Card Generator" />
     <title>Visual Card Generator</title>
+    <style>
+      :root {
+        --bg-color: #f4f4f5;
+        --card-bg: #ffffff;
+        --text-color: #18181b;
+        --text-muted: #71717a;
+        --border-color: #e4e4e7;
+
+        --btn-primary-bg: #18181b;
+        --btn-primary-text: #ffffff;
+        --btn-primary-hover: #27272a;
+
+        --btn-secondary-bg: #f4f4f5;
+        --btn-secondary-text: #18181b;
+        --btn-secondary-border: #d4d4d8;
+        --btn-secondary-hover: #e4e4e7;
+
+        --shadow:
+          0 10px 25px -5px rgba(0, 0, 0, 0.05),
+          0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #0d0d0d;
+          --card-bg: #181818;
+          --text-color: #f4f4f5;
+          --text-muted: #a1a1aa;
+          --border-color: #27272a;
+
+          --btn-primary-bg: #f4f4f5;
+          --btn-primary-text: #09090b;
+          --btn-primary-hover: #e4e4e7;
+
+          --btn-secondary-bg: #27272a;
+          --btn-secondary-text: #f4f4f5;
+          --btn-secondary-border: #3f3f46;
+          --btn-secondary-hover: #3f3f46;
+
+          --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 24px 16px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition:
+          background-color 0.2s ease,
+          color 0.2s ease;
+      }
+
+      header {
+        width: 100%;
+        max-width: 1100px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        font-size: 22px;
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .app-workspace {
+        width: 100%;
+        max-width: 1100px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      /* Two Columns */
+      @media (min-width: 860px) {
+        .app-workspace {
+          grid-template-columns: 1.1fr 0.9fr;
+        }
+        .preview-container {
+          position: sticky;
+          top: 24px;
+        }
+      }
+
+      .preview-box {
+        width: 100%;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        display: block;
+      }
+
+      .form-container {
+        width: 100%;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+        border: 1px solid transparent;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        flex: 1;
+        transition:
+          background-color 0.15s ease,
+          border-color 0.15s ease;
+      }
+
+      .btn:hover {
+        background: var(--btn-primary-hover);
+      }
+
+      .btn-secondary {
+        background: var(--btn-secondary-bg);
+        color: var(--btn-secondary-text);
+        border-color: var(--btn-secondary-border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--btn-secondary-hover);
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: auto;
+      }
+
+      .btn:disabled:active {
+        transform: none;
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <header>
+      <h1>Visual Card Generator v0.1.0</h1>
+    </header>
+    <main class="app-workspace">
+      <div class="preview-container">
+        <div class="preview-box">
+          <canvas id="slideCanvas" aria-label="Card preview canvas">
+            Your browser does not support HTML canvas.
+          </canvas>
+        </div>
+      </div>
+      <div class="form-container">
+        <div class="btn-group">
+          <button
+            type="button"
+            class="btn"
+            onclick="downloadImage()"
+            aria-label="Download generated image as PNG"
+          >
+            Download
+          </button>
+          <button
+            type="button"
+            id="copyBtn"
+            class="btn btn-secondary"
+            onclick="copyImage()"
+            aria-label="Copy generated image to clipboard"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+    </main>
+    <script>
+      const state = {
+        width: 1080,
+        height: 1350,
+      };
+
+      function checkClipboardCopySupport() {
+        const copyBtn = document.getElementById("copyBtn");
+        if (!copyBtn) return;
+
+        const isClipboardSupported =
+          !!navigator.clipboard && typeof window.ClipboardItem !== "undefined";
+
+        copyBtn.disabled = !isClipboardSupported;
+        if (copyBtn.disabled) {
+          copyBtn.setAttribute(
+            "title",
+            "Clipboard copy is not supported in this browser context",
+          );
+        }
+      }
+
+      function render() {
+        const canvas = document.getElementById("slideCanvas");
+        if (!canvas) return;
+
+        canvas.style.aspectRatio = `${state.width} / ${state.height}`;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = state.width * dpr;
+        canvas.height = state.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const isDarkMode =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        ctx.fillStyle = isDarkMode ? "#121113" : "#FFFFFF";
+        ctx.fillRect(0, 0, state.width, state.height);
+
+        checkClipboardCopySupport();
+      }
+
+      function downloadImage() {
+        const canvas = document.getElementById("slideCanvas");
+        if (!canvas) return;
+
+        const link = document.createElement("a");
+        link.download = "visual-card.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
+
+      async function copyImage() {
+        const canvas = document.getElementById("slideCanvas");
+        if (!canvas) return;
+
+        if (!navigator.clipboard || !window.ClipboardItem) {
+          alert(
+            "Clipboard API not supported in this environment. Use Download.",
+          );
+          return;
+        }
+
+        try {
+          canvas.toBlob(async (blob) => {
+            if (!blob) return;
+
+            const item = new ClipboardItem({ "image/png": blob });
+
+            await navigator.clipboard.write([item]);
+            alert("Card copied to clipboard!");
+          });
+        } catch (err) {
+          alert("Copy failed. Use Download.");
+        }
+      }
+
+      const darkModeMediaQuery = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      );
+
+      if (darkModeMediaQuery.addEventListener) {
+        darkModeMediaQuery.addEventListener("change", render);
+      } else {
+        darkModeMediaQuery.addListener(render);
+      }
+
+      document.addEventListener("DOMContentLoaded", render);
+    </script>
+  </body>
 </html>
