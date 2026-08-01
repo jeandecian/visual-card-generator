@@ -170,12 +170,48 @@
         gap: 6px;
       }
 
+      .label-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
       label {
         font-size: 12px;
         font-weight: 600;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.5px;
+      }
+
+      .theme-name-display {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-top: 4px;
+      }
+
+      .color-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        background: var(--btn-secondary-bg);
+        padding: 2px 6px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+      }
+
+      .color-dot-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        display: inline-block;
       }
 
       select,
@@ -215,6 +251,51 @@
       input[type="text"]:focus,
       textarea:focus {
         border-color: var(--text-color);
+      }
+
+      .palette-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+        gap: 8px;
+      }
+
+      .palette-card {
+        height: 42px;
+        border-radius: 8px;
+        border: 2px solid var(--border-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.15s ease,
+          border-color 0.15s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .palette-card:hover {
+        transform: scale(1.05);
+      }
+
+      .palette-card.active {
+        border-color: var(--text-color);
+        box-shadow: 0 0 0 1px var(--text-color);
+      }
+
+      .palette-card .sample-text {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        user-select: none;
+      }
+
+      .palette-card .accent-stripe {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
       }
 
       .btn-group {
@@ -302,7 +383,7 @@
   </head>
   <body>
     <header>
-      <h1>Visual Card Generator v0.3.0</h1>
+      <h1>Visual Card Generator v0.4.0</h1>
     </header>
     <main class="app-workspace">
       <div class="preview-container">
@@ -313,6 +394,48 @@
         </div>
       </div>
       <div class="form-container">
+        <fieldset
+          class="form-group"
+          style="border: none; padding: 0; margin: 0"
+        >
+          <legend
+            class="sr-only"
+            style="
+              position: absolute;
+              width: 1px;
+              height: 1px;
+              padding: 0;
+              margin: -1px;
+              overflow: hidden;
+              clip: rect(0, 0, 0, 0);
+              border: 0;
+            "
+          >
+            Color Palette
+          </legend>
+
+          <div class="label-wrapper">
+            <span
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              "
+              aria-hidden="true"
+            >
+              Color Palette
+            </span>
+            <div class="color-badge">
+              <span class="color-dot-indicator" id="indicator-bg"></span>
+              <span>BG: <span id="hex-bg"></span></span>
+            </div>
+          </div>
+
+          <div class="palette-grid" id="paletteGrid" role="radiogroup"></div>
+          <div class="theme-name-display" id="themeNameDisplay"></div>
+        </fieldset>
         <div class="form-row">
           <div class="form-group">
             <label for="formatSelect">Card Format</label>
@@ -341,19 +464,37 @@
           </select>
         </div>
         <div class="form-group" id="group-hero">
-          <label for="heroInput">Hero Title</label>
+          <div class="label-wrapper">
+            <label for="heroInput">Hero Title</label>
+            <div class="color-badge">
+              <span class="color-dot-indicator" id="indicator-hero"></span>
+              <span id="hex-hero"></span>
+            </div>
+          </div>
           <textarea id="heroInput" oninput="handleInputChange()">
 Visual Cards Made Simple.</textarea
           >
         </div>
         <div class="form-group" id="group-headline">
-          <label for="headlineInput">Main Headline</label>
+          <div class="label-wrapper">
+            <label for="headlineInput">Main Headline</label>
+            <div class="color-badge">
+              <span class="color-dot-indicator" id="indicator-headline"></span>
+              <span id="hex-headline"></span>
+            </div>
+          </div>
           <textarea id="headlineInput" oninput="handleInputChange()">
 Craft high-converting visual cards in seconds.</textarea
           >
         </div>
         <div class="form-group" id="group-subtitle">
-          <label for="subtitleInput">Subtitle</label>
+          <div class="label-wrapper">
+            <label for="subtitleInput">Subtitle</label>
+            <div class="color-badge">
+              <span id="indicator-subtitle" class="color-dot-indicator"></span>
+              <span id="hex-subtitle"></span>
+            </div>
+          </div>
           <input
             type="text"
             id="subtitleInput"
@@ -362,7 +503,13 @@ Craft high-converting visual cards in seconds.</textarea
           />
         </div>
         <div class="form-group" id="group-body">
-          <label for="bodyInput">Body / Content</label>
+          <div class="label-wrapper">
+            <label for="bodyInput">Body / Content</label>
+            <div class="color-badge">
+              <span id="indicator-body" class="color-dot-indicator"></span>
+              <span id="hex-body"></span>
+            </div>
+          </div>
           <textarea id="bodyInput" oninput="handleInputChange()">
 - Instant aspect ratio adjustments
 - Dynamic text wrapping & line height
@@ -370,7 +517,13 @@ Craft high-converting visual cards in seconds.</textarea
           >
         </div>
         <div class="form-group">
-          <label for="tagInput">Social Handle / Tag</label>
+          <div class="label-wrapper">
+            <label for="tagInput">Social Handle / Tag</label>
+            <div class="color-badge">
+              <span id="indicator-tag" class="color-dot-indicator"></span>
+              <span id="hex-tag"></span>
+            </div>
+          </div>
           <input
             type="text"
             id="tagInput"
@@ -406,6 +559,406 @@ Craft high-converting visual cards in seconds.</textarea
       aria-atomic="true"
     ></div>
     <script>
+      let PALETTES = [
+        // Botanical Emerald Pair
+        {
+          name: "Botanical Emerald — Full Canvas",
+          primary: "#FFFFFF",
+          secondary: "#FFFFFF",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#E2EBC8",
+          bg: "#6B8915",
+        },
+        {
+          name: "Botanical Emerald — Pure Light",
+          primary: "#6B8915",
+          secondary: "#556D10",
+          fontPrimary: "#6B8915",
+          fontMuted: "#556D10",
+          bg: "#FFFFFF",
+        },
+
+        // Classic Library & Ivy Pair
+        {
+          name: "Classic Library & Ivy — Dark",
+          primary: "#E6DFD3",
+          secondary: "#C9A050",
+          fontPrimary: "#E6DFD3",
+          fontMuted: "#A39785",
+          bg: "#1D322C",
+        },
+        {
+          name: "Classic Library & Ivy — Light",
+          primary: "#2D4A43",
+          secondary: "#800020",
+          fontPrimary: "#4A3728",
+          fontMuted: "#7A6250",
+          bg: "#E6DFD3",
+        },
+
+        // Crimson Statement Pair
+        {
+          name: "Crimson Statement — Full Canvas",
+          primary: "#FFFFFF",
+          secondary: "#FECDD3",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#FFE4E6",
+          bg: "#E11D48",
+        },
+        {
+          name: "Crimson Statement — Light Canvas",
+          primary: "#E11D48",
+          secondary: "#BE123C",
+          fontPrimary: "#881337",
+          fontMuted: "#9F1239",
+          bg: "#FFF1F2",
+        },
+
+        // Cyber & Tech Grid Pair
+        {
+          name: "Cyber Grid — Full Canvas Dark",
+          primary: "#60A5FA",
+          secondary: "#A9DFBF",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#94A3B8",
+          bg: "#0B132B",
+        },
+        {
+          name: "Cyber Grid — Light Grid Canvas",
+          primary: "#0052FF",
+          secondary: "#10B981",
+          fontPrimary: "#1E1E24",
+          fontMuted: "#5C6672",
+          bg: "#E2E8F0",
+        },
+
+        // Cyber Security Pair
+        {
+          name: "Cyber Security — Abyssal Terminal",
+          primary: "#22C55E",
+          secondary: "#4ADE80",
+          fontPrimary: "#22C55E",
+          fontMuted: "#15803D",
+          bg: "#050505",
+        },
+        {
+          name: "Cyber Security — Bright Alert",
+          primary: "#0F172A",
+          secondary: "#16A34A",
+          fontPrimary: "#0F172A",
+          fontMuted: "#475569",
+          bg: "#F0FDF4",
+        },
+
+        // Cyber Violet Indigo Pair
+        {
+          name: "Cyber Violet Indigo — Full Canvas",
+          primary: "#FFFFFF",
+          secondary: "#C7D2FE",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#A5B4FC",
+          bg: "#4338CA",
+        },
+        {
+          name: "Cyber Violet Indigo — Light Canvas",
+          primary: "#6366F1",
+          secondary: "#4338CA",
+          fontPrimary: "#0F172A",
+          fontMuted: "#64748B",
+          bg: "#F8FAFC",
+        },
+
+        // Deep Academic Classic Pair
+        {
+          name: "Deep Academic — Dark Canvas",
+          primary: "#38BDF8",
+          secondary: "#38BDF8",
+          fontPrimary: "#F8FAFC",
+          fontMuted: "#94A3B8",
+          bg: "#1B2A4A",
+        },
+        {
+          name: "Deep Academic — Light Canvas",
+          primary: "#1B2A4A",
+          secondary: "#2A7B88",
+          fontPrimary: "#1E242B",
+          fontMuted: "#5C6672",
+          bg: "#F8F9FA",
+        },
+
+        // Deep Midnight Navy Pair (#082779)
+        {
+          name: "Deep Midnight Navy — Full Canvas",
+          primary: "#60A5FA",
+          secondary: "#93C5FD",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#94A3B8",
+          bg: "#082779",
+        },
+        {
+          name: "Deep Midnight Navy — Light Canvas",
+          primary: "#082779",
+          secondary: "#2563EB",
+          fontPrimary: "#0F172A",
+          fontMuted: "#475569",
+          bg: "#F8FAFC",
+        },
+
+        // Deep Velvet Purple Pair
+        {
+          name: "Deep Velvet Purple — Full Canvas",
+          primary: "#E9D5FF",
+          secondary: "#F5D0FE",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#D8B4FE",
+          bg: "#581C87",
+        },
+        {
+          name: "Deep Velvet Purple — Light Canvas",
+          primary: "#6B21A8",
+          secondary: "#7E22CE",
+          fontPrimary: "#3B0764",
+          fontMuted: "#6B21A8",
+          bg: "#FAF5FF",
+        },
+
+        // Emerald Mint Fresh Pair
+        {
+          name: "Emerald Mint — Full Canvas Dark",
+          primary: "#FFFFFF",
+          secondary: "#A7F3D0",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#6EE7B7",
+          bg: "#047857",
+        },
+        {
+          name: "Emerald Mint — Light Canvas",
+          primary: "#059669",
+          secondary: "#047857",
+          fontPrimary: "#064E3B",
+          fontMuted: "#475569",
+          bg: "#F0FDF4",
+        },
+
+        // Emerald & Sage Pair
+        {
+          name: "Emerald & Sage — Dark Canvas",
+          primary: "#A7F3D0",
+          secondary: "#4A9175",
+          fontPrimary: "#F2F6F4",
+          fontMuted: "#94A3B8",
+          bg: "#1C3B2B",
+        },
+        {
+          name: "Emerald & Sage — Light Canvas",
+          primary: "#1C3B2B",
+          secondary: "#4A9175",
+          fontPrimary: "#121814",
+          fontMuted: "#63756C",
+          bg: "#F2F6F4",
+        },
+
+        // Golden Celebration Pair
+        {
+          name: "Golden Celebration — Dark Milestone",
+          primary: "#FDE047",
+          secondary: "#FACC15",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#E2E8F0",
+          bg: "#111827",
+        },
+        {
+          name: "Golden Celebration — Light Announcement",
+          primary: "#854D0E",
+          secondary: "#A16207",
+          fontPrimary: "#451A03",
+          fontMuted: "#78350F",
+          bg: "#FFFBEB",
+        },
+
+        // Matte Monochromatic Pair
+        {
+          name: "Matte Monochromatic — Dark",
+          primary: "#F9F9F9",
+          secondary: "#B8B0A6",
+          fontPrimary: "#F9F9F9",
+          fontMuted: "#888888",
+          bg: "#121212",
+        },
+        {
+          name: "Matte Monochromatic — Light",
+          primary: "#121212",
+          secondary: "#B8B0A6",
+          fontPrimary: "#121212",
+          fontMuted: "#B8B0A6",
+          bg: "#F9F9F9",
+        },
+
+        // Minimalist Warm Sand Pair
+        {
+          name: "Minimalist Warm Sand — Dark Canvas",
+          primary: "#DEC1AE",
+          secondary: "#5A4057",
+          fontPrimary: "#F4EFEA",
+          fontMuted: "#A39A9F",
+          bg: "#121113",
+        },
+        {
+          name: "Minimalist Warm Sand — Light Canvas",
+          primary: "#DEC1AE",
+          secondary: "#2D232E",
+          fontPrimary: "#1C1B1F",
+          fontMuted: "#615B63",
+          bg: "#FAFAFA",
+        },
+
+        // Monochrome Minimalist Pair
+        {
+          name: "Monochrome Minimalist — Pure Dark",
+          primary: "#FFFFFF",
+          secondary: "#A1A1AA",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#A1A1AA",
+          bg: "#000000",
+        },
+        {
+          name: "Monochrome Minimalist — Pure Light",
+          primary: "#000000",
+          secondary: "#52525B",
+          fontPrimary: "#000000",
+          fontMuted: "#52525B",
+          bg: "#FFFFFF",
+        },
+
+        // Nordic Minimalist Clay Pair
+        {
+          name: "Nordic Clay — Dark Canvas",
+          primary: "#C28C7E",
+          secondary: "#C28C7E",
+          fontPrimary: "#FDFBF7",
+          fontMuted: "#94A3B8",
+          bg: "#1A2B4C",
+        },
+        {
+          name: "Nordic Clay — Light Canvas",
+          primary: "#1A2B4C",
+          secondary: "#C28C7E",
+          fontPrimary: "#1A2B4C",
+          fontMuted: "#94A3B8",
+          bg: "#FDFBF7",
+        },
+
+        // Nordic Ice Slate Pair
+        {
+          name: "Nordic Ice Slate — Dark Canvas",
+          primary: "#38BDF8",
+          secondary: "#008299",
+          fontPrimary: "#F4F7F9",
+          fontMuted: "#94A3B8",
+          bg: "#0F2232",
+        },
+        {
+          name: "Nordic Ice Slate — Light Canvas",
+          primary: "#0F2232",
+          secondary: "#008299",
+          fontPrimary: "#182026",
+          fontMuted: "#5F6D7A",
+          bg: "#F4F7F9",
+        },
+
+        // Ocean Coral Pair
+        {
+          name: "Ocean & Coral — Dark Canvas",
+          primary: "#E06D53",
+          secondary: "#E06D53",
+          fontPrimary: "#FAFBFC",
+          fontMuted: "#94A3B8",
+          bg: "#162C46",
+        },
+        {
+          name: "Ocean & Coral — Light Canvas",
+          primary: "#162C46",
+          secondary: "#E06D53",
+          fontPrimary: "#1A1D20",
+          fontMuted: "#6C757D",
+          bg: "#FAFBFC",
+        },
+
+        // PhD Academic Pair
+        {
+          name: "PhD Dissertation — Dark Academic",
+          primary: "#38BDF8",
+          secondary: "#FDE047",
+          fontPrimary: "#F8FAFC",
+          fontMuted: "#94A3B8",
+          bg: "#0F172A",
+        },
+        {
+          name: "PhD Dissertation — Light Parchment",
+          primary: "#1E3A8A",
+          secondary: "#B45309",
+          fontPrimary: "#1E293B",
+          fontMuted: "#64748B",
+          bg: "#FEFCE8",
+        },
+
+        // Technology & AI Matrix Pair
+        {
+          name: "Tech Matrix — Full Canvas Dark",
+          primary: "#FFFFFF",
+          secondary: "#67E8F9",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#A5F3FC",
+          bg: "#0284C7",
+        },
+        {
+          name: "Tech Matrix — Light Cyber Gray",
+          primary: "#0284C7",
+          secondary: "#0369A1",
+          fontPrimary: "#0F172A",
+          fontMuted: "#64748B",
+          bg: "#F1F5F9",
+        },
+
+        // Vibrant Azure Pair (#3381FB)
+        {
+          name: "Vibrant Azure — Full Canvas",
+          primary: "#FFFFFF",
+          secondary: "#E0F2FE",
+          fontPrimary: "#FFFFFF",
+          fontMuted: "#BAE6FD",
+          bg: "#3381FB",
+        },
+        {
+          name: "Vibrant Azure — Light Canvas",
+          primary: "#3381FB",
+          secondary: "#0284C7",
+          fontPrimary: "#0C4A6E",
+          fontMuted: "#0284C7",
+          bg: "#F0F9FF",
+        },
+      ];
+
+      function removeDuplicatePalettes() {
+        const seen = new Set();
+
+        PALETTES = PALETTES.filter((palette) => {
+          if (seen.has(palette.name)) {
+            return false;
+          }
+
+          seen.add(palette.name);
+
+          return true;
+        });
+      }
+
+      function sortPalettesAlphabetically() {
+        PALETTES.sort((a, b) => a.name.localeCompare(b.name));
+      }
+
+      let selectedPaletteIndex = 0;
+
       const FORMAT_PRESETS = {
         "4:5": { width: 1080, height: 1350 },
         "1:1": { width: 1080, height: 1080 },
@@ -479,6 +1032,87 @@ Craft high-converting visual cards in seconds.</textarea
           },
         },
       };
+
+      function updateFieldColorIndicators() {
+        const palette = PALETTES[selectedPaletteIndex];
+
+        const fieldMap = [
+          {
+            dotId: "indicator-bg",
+            hexId: "hex-bg",
+            color: palette.bg,
+          },
+          {
+            dotId: "indicator-hero",
+            hexId: "hex-hero",
+            color: palette.fontPrimary,
+          },
+          {
+            dotId: "indicator-headline",
+            hexId: "hex-headline",
+            color: palette.fontPrimary,
+          },
+          {
+            dotId: "indicator-subtitle",
+            hexId: "hex-subtitle",
+            color: palette.fontMuted,
+          },
+          {
+            dotId: "indicator-body",
+            hexId: "hex-body",
+            color: palette.fontPrimary,
+          },
+          {
+            dotId: "indicator-tag",
+            hexId: "hex-tag",
+            color: palette.secondary,
+          },
+        ];
+
+        fieldMap.forEach((item) => {
+          const dot = document.getElementById(item.dotId);
+          const hex = document.getElementById(item.hexId);
+
+          if (dot) dot.style.backgroundColor = item.color;
+          if (hex) hex.textContent = item.color;
+        });
+
+        const nameDisplay = document.getElementById("themeNameDisplay");
+        if (nameDisplay) {
+          nameDisplay.textContent = palette.name;
+        }
+      }
+
+      function renderPalettePicker() {
+        const grid = document.getElementById("paletteGrid");
+        grid.innerHTML = "";
+
+        PALETTES.forEach((palette, idx) => {
+          const card = document.createElement("div");
+          card.className = `palette-card ${idx === selectedPaletteIndex ? "active" : ""}`;
+          card.style.backgroundColor = palette.bg;
+          card.title = palette.name;
+          card.onclick = () => {
+            selectedPaletteIndex = idx;
+            renderPalettePicker();
+            updateFieldColorIndicators();
+            render();
+          };
+
+          const textSample = document.createElement("span");
+          textSample.className = "sample-text";
+          textSample.textContent = "Aa";
+          textSample.style.color = palette.fontPrimary;
+
+          const accentStripe = document.createElement("div");
+          accentStripe.className = "accent-stripe";
+          accentStripe.style.backgroundColor = palette.primary;
+
+          card.appendChild(textSample);
+          card.appendChild(accentStripe);
+          grid.appendChild(card);
+        });
+      }
 
       function showToast(message, duration = 3000) {
         const container = document.getElementById("toastContainer");
@@ -602,6 +1236,7 @@ Craft high-converting visual cards in seconds.</textarea
         const layoutType = document.getElementById("layoutPreset").value;
         const align = document.getElementById("alignSelect").value;
 
+        const palette = PALETTES[selectedPaletteIndex];
         const preset = FORMAT_PRESETS[formatKey];
         const layoutSpecs = SPECS[formatKey][align];
 
@@ -616,14 +1251,7 @@ Craft high-converting visual cards in seconds.</textarea
         canvas.height = preset.height * dpr;
         ctx.scale(dpr, dpr);
 
-        const isDarkMode =
-          window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-        const textColor = isDarkMode ? "#F4F4F5" : "#18181B";
-        const textMuted = isDarkMode ? "#A1A1AA" : "#71717A";
-
-        ctx.fillStyle = isDarkMode ? "#0D0D0D" : "#FFFFFF";
+        ctx.fillStyle = palette.bg;
         ctx.fillRect(0, 0, preset.width, preset.height);
 
         let activeY = null;
@@ -636,7 +1264,7 @@ Craft high-converting visual cards in seconds.</textarea
             heroText,
             layoutSpecs.hero,
             align,
-            textColor,
+            palette.fontPrimary,
             "700",
           );
         } else {
@@ -646,7 +1274,7 @@ Craft high-converting visual cards in seconds.</textarea
             headlineText,
             layoutSpecs.headline,
             align,
-            textColor,
+            palette.fontPrimary,
             "700",
           );
 
@@ -660,7 +1288,7 @@ Craft high-converting visual cards in seconds.</textarea
               subtitleText,
               layoutSpecs.subtitle,
               align,
-              textMuted,
+              palette.fontMuted,
               "500",
               subY,
             );
@@ -680,7 +1308,7 @@ Craft high-converting visual cards in seconds.</textarea
               bodyText,
               layoutSpecs.body,
               align,
-              textColor,
+              palette.fontPrimary,
               "400",
               bodyY,
             );
@@ -694,8 +1322,8 @@ Craft high-converting visual cards in seconds.</textarea
           tagText,
           layoutSpecs.tag,
           align,
-          textMuted,
-          "500",
+          palette.secondary,
+          "600",
         );
 
         checkClipboardCopySupport();
@@ -747,6 +1375,10 @@ Craft high-converting visual cards in seconds.</textarea
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        removeDuplicatePalettes();
+        sortPalettesAlphabetically();
+        renderPalettePicker();
+        updateFieldColorIndicators();
         handlePresetChange();
       });
     </script>
