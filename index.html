@@ -155,7 +155,13 @@
         box-shadow: var(--shadow);
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 18px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
       }
 
       .form-group {
@@ -165,16 +171,18 @@
       }
 
       label {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
 
-      select {
+      select,
+      input[type="text"],
+      textarea {
         width: 100%;
-        padding: 12px 40px 12px 14px;
+        padding: 10px 14px;
         border-radius: 10px;
         border: 1px solid var(--input-border);
         background-color: var(--input-bg);
@@ -182,8 +190,12 @@
         font-size: 14px;
         font-weight: 500;
         outline: none;
-        cursor: pointer;
         transition: border-color 0.15s ease;
+      }
+
+      select {
+        padding-right: 40px;
+        cursor: pointer;
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
@@ -193,7 +205,15 @@
         background-size: 16px;
       }
 
-      select:focus {
+      textarea {
+        resize: vertical;
+        min-height: 72px;
+        font-family: inherit;
+      }
+
+      select:focus,
+      input[type="text"]:focus,
+      textarea:focus {
         border-color: var(--text-color);
       }
 
@@ -282,7 +302,7 @@
   </head>
   <body>
     <header>
-      <h1>Visual Card Generator v0.2.0</h1>
+      <h1>Visual Card Generator v0.3.0</h1>
     </header>
     <main class="app-workspace">
       <div class="preview-container">
@@ -293,16 +313,71 @@
         </div>
       </div>
       <div class="form-container">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="formatSelect">Card Format</label>
+            <select id="formatSelect" onchange="handleInputChange()">
+              <option value="4:5">4:5 Vertical (1080 x 1350)</option>
+              <option value="1:1">1:1 Square (1080 x 1080)</option>
+              <option value="16:9">16:9 Landscape (1920 x 1080)</option>
+              <option value="4:1">4:1 Banner (1584 x 396)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="layoutPreset">Layout Type</label>
+            <select id="layoutPreset" onchange="handlePresetChange()">
+              <option value="hero">Hero Statement</option>
+              <option value="headline_subtitle">Headline + Subtitle</option>
+              <option value="headline_body">Headline + Body</option>
+              <option value="full">Full Stack</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group">
-          <label for="formatSelect">Card Format</label>
-          <select id="formatSelect" onchange="handleFormatChange(event)">
-            <option value="4:5">4:5 Vertical Portrait (1080 x 1350 px)</option>
-            <option value="1:1">1:1 Square (1080 x 1080 px)</option>
-            <option value="16:9">16:9 Landscape (1920 x 1080 px)</option>
-            <option value="4:1">4:1 Header Banner (1584 x 396 px)</option>
+          <label for="alignSelect">Text Alignment</label>
+          <select id="alignSelect" onchange="handleInputChange()">
+            <option value="left">Left Aligned</option>
+            <option value="center">Center Aligned</option>
           </select>
         </div>
-
+        <div class="form-group" id="group-hero">
+          <label for="heroInput">Hero Title</label>
+          <textarea id="heroInput" oninput="handleInputChange()">
+Visual Cards Made Simple.</textarea
+          >
+        </div>
+        <div class="form-group" id="group-headline">
+          <label for="headlineInput">Main Headline</label>
+          <textarea id="headlineInput" oninput="handleInputChange()">
+Craft high-converting visual cards in seconds.</textarea
+          >
+        </div>
+        <div class="form-group" id="group-subtitle">
+          <label for="subtitleInput">Subtitle</label>
+          <input
+            type="text"
+            id="subtitleInput"
+            value="Optimized layouts designed for clean content creation."
+            oninput="handleInputChange()"
+          />
+        </div>
+        <div class="form-group" id="group-body">
+          <label for="bodyInput">Body / Content</label>
+          <textarea id="bodyInput" oninput="handleInputChange()">
+- Instant aspect ratio adjustments
+- Dynamic text wrapping & line height
+- Pixel-perfect typography guidelines</textarea
+          >
+        </div>
+        <div class="form-group">
+          <label for="tagInput">Social Handle / Tag</label>
+          <input
+            type="text"
+            id="tagInput"
+            value="@visualcardgen"
+            oninput="handleInputChange()"
+          />
+        </div>
         <div class="btn-group">
           <button
             type="button"
@@ -338,10 +413,71 @@
         "4:1": { width: 1584, height: 396 },
       };
 
-      const state = {
-        format: "4:5",
-        width: 1080,
-        height: 1350,
+      const SPECS = {
+        "1:1": {
+          left: {
+            hero: { fontSize: 100, x: 80, y: 160, maxWidth: 920 },
+            headline: { fontSize: 72, x: 80, y: 180, maxWidth: 920 },
+            subtitle: { fontSize: 40, x: 80, gapY: 24, maxWidth: 920 },
+            body: { fontSize: 30, x: 80, y: 520, maxWidth: 920 },
+            tag: { fontSize: 22, x: 80, y: 980, maxWidth: 920 },
+          },
+          center: {
+            hero: { fontSize: 100, x: 540, y: 200, maxWidth: 840 },
+            headline: { fontSize: 72, x: 540, y: 240, maxWidth: 840 },
+            subtitle: { fontSize: 40, x: 540, gapY: 24, maxWidth: 840 },
+            body: { fontSize: 30, x: 540, y: 560, maxWidth: 840 },
+            tag: { fontSize: 22, x: 540, y: 980, maxWidth: 840 },
+          },
+        },
+        "4:5": {
+          left: {
+            hero: { fontSize: 110, x: 90, y: 180, maxWidth: 900 },
+            headline: { fontSize: 80, x: 90, y: 200, maxWidth: 900 },
+            subtitle: { fontSize: 44, x: 90, gapY: 28, maxWidth: 900 },
+            body: { fontSize: 34, x: 90, y: 580, maxWidth: 900 },
+            tag: { fontSize: 22, x: 90, y: 1220, maxWidth: 900 },
+          },
+          center: {
+            hero: { fontSize: 110, x: 540, y: 240, maxWidth: 860 },
+            headline: { fontSize: 80, x: 540, y: 280, maxWidth: 860 },
+            subtitle: { fontSize: 44, x: 540, gapY: 28, maxWidth: 860 },
+            body: { fontSize: 34, x: 540, y: 640, maxWidth: 860 },
+            tag: { fontSize: 22, x: 540, y: 1220, maxWidth: 860 },
+          },
+        },
+        "16:9": {
+          left: {
+            hero: { fontSize: 120, x: 140, y: 140, maxWidth: 850 },
+            headline: { fontSize: 84, x: 140, y: 160, maxWidth: 850 },
+            subtitle: { fontSize: 48, x: 140, gapY: 24, maxWidth: 850 },
+            body: { fontSize: 36, x: 1040, y: 160, maxWidth: 740 },
+            tag: { fontSize: 24, x: 140, y: 980, maxWidth: 850 },
+          },
+          center: {
+            hero: { fontSize: 120, x: 960, y: 180, maxWidth: 1200 },
+            headline: { fontSize: 84, x: 960, y: 220, maxWidth: 1200 },
+            subtitle: { fontSize: 48, x: 960, gapY: 28, maxWidth: 1200 },
+            body: { fontSize: 36, x: 960, y: 580, maxWidth: 1200 },
+            tag: { fontSize: 24, x: 960, y: 980, maxWidth: 1200 },
+          },
+        },
+        "4:1": {
+          left: {
+            hero: { fontSize: 56, x: 420, y: 100, maxWidth: 1100 },
+            headline: { fontSize: 56, x: 420, y: 100, maxWidth: 1100 },
+            subtitle: { fontSize: 30, x: 420, y: 180, maxWidth: 1100 },
+            body: { fontSize: 22, x: 420, y: 220, maxWidth: 1100 },
+            tag: { fontSize: 20, x: 420, y: 280, maxWidth: 1100 },
+          },
+          center: {
+            hero: { fontSize: 56, x: 792, y: 90, maxWidth: 1200 },
+            headline: { fontSize: 56, x: 792, y: 90, maxWidth: 1200 },
+            subtitle: { fontSize: 30, x: 792, y: 170, maxWidth: 1200 },
+            body: { fontSize: 22, x: 792, y: 210, maxWidth: 1200 },
+            tag: { fontSize: 20, x: 792, y: 260, maxWidth: 1200 },
+          },
+        },
       };
 
       function showToast(message, duration = 3000) {
@@ -382,39 +518,185 @@
         }
       }
 
-      function handleFormatChange(event) {
-        const selectedFormat = event.target.value;
-        const preset = FORMAT_PRESETS[selectedFormat];
+      function handlePresetChange() {
+        const preset = document.getElementById("layoutPreset").value;
 
-        if (preset) {
-          state.format = selectedFormat;
-          state.width = preset.width;
-          state.height = preset.height;
-          render();
+        document.getElementById("group-hero").style.display =
+          preset === "hero" ? "flex" : "none";
+        document.getElementById("group-headline").style.display =
+          preset !== "hero" ? "flex" : "none";
+        document.getElementById("group-subtitle").style.display =
+          preset === "headline_subtitle" || preset === "full" ? "flex" : "none";
+        document.getElementById("group-body").style.display =
+          preset === "headline_body" || preset === "full" ? "flex" : "none";
+
+        render();
+      }
+
+      function handleInputChange() {
+        render();
+      }
+
+      function wrapText(ctx, text, maxWidth) {
+        const lines = [];
+        const rawParagraphs = text.split("\n");
+
+        for (const para of rawParagraphs) {
+          if (para.trim() === "") {
+            lines.push("");
+            continue;
+          }
+
+          const words = para.split(" ");
+          let currentLine = words[0];
+
+          for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const testLine = currentLine + " " + word;
+            const metrics = ctx.measureText(testLine);
+
+            if (metrics.width > maxWidth) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          lines.push(currentLine);
         }
+        return lines;
+      }
+
+      function renderTextElement(
+        ctx,
+        text,
+        spec,
+        align,
+        color,
+        fontWeight = "600",
+        customY = null,
+      ) {
+        if (!text || !text.trim()) return 0;
+
+        ctx.font = `${fontWeight} ${spec.fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif`;
+        ctx.fillStyle = color;
+        ctx.textAlign = align;
+        ctx.textBaseline = "top";
+
+        const lineHeight = spec.fontSize * 1.2;
+        const lines = wrapText(ctx, text, spec.maxWidth);
+        const startY = customY !== null ? customY : spec.y;
+
+        lines.forEach((line, index) => {
+          ctx.fillText(line, spec.x, startY + index * lineHeight);
+        });
+
+        return lines.length * lineHeight;
       }
 
       function render() {
         const canvas = document.getElementById("slideCanvas");
         if (!canvas) return;
 
-        canvas.style.aspectRatio = `${state.width} / ${state.height}`;
+        const formatKey = document.getElementById("formatSelect").value;
+        const layoutType = document.getElementById("layoutPreset").value;
+        const align = document.getElementById("alignSelect").value;
+
+        const preset = FORMAT_PRESETS[formatKey];
+        const layoutSpecs = SPECS[formatKey][align];
+
+        canvas.style.aspectRatio = `${preset.width} / ${preset.height}`;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         const dpr = window.devicePixelRatio || 1;
 
-        canvas.width = state.width * dpr;
-        canvas.height = state.height * dpr;
+        canvas.width = preset.width * dpr;
+        canvas.height = preset.height * dpr;
         ctx.scale(dpr, dpr);
 
         const isDarkMode =
           window.matchMedia &&
           window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-        ctx.fillStyle = isDarkMode ? "#121113" : "#FFFFFF";
-        ctx.fillRect(0, 0, state.width, state.height);
+        const textColor = isDarkMode ? "#F4F4F5" : "#18181B";
+        const textMuted = isDarkMode ? "#A1A1AA" : "#71717A";
+
+        ctx.fillStyle = isDarkMode ? "#0D0D0D" : "#FFFFFF";
+        ctx.fillRect(0, 0, preset.width, preset.height);
+
+        let activeY = null;
+
+        if (layoutType === "hero") {
+          const heroText = document.getElementById("heroInput").value;
+
+          renderTextElement(
+            ctx,
+            heroText,
+            layoutSpecs.hero,
+            align,
+            textColor,
+            "700",
+          );
+        } else {
+          const headlineText = document.getElementById("headlineInput").value;
+          const headlineHeight = renderTextElement(
+            ctx,
+            headlineText,
+            layoutSpecs.headline,
+            align,
+            textColor,
+            "700",
+          );
+
+          activeY = layoutSpecs.headline.y + headlineHeight;
+
+          if (layoutType === "headline_subtitle" || layoutType === "full") {
+            const subtitleText = document.getElementById("subtitleInput").value;
+            const subY = activeY + (layoutSpecs.subtitle.gapY || 24);
+            const subHeight = renderTextElement(
+              ctx,
+              subtitleText,
+              layoutSpecs.subtitle,
+              align,
+              textMuted,
+              "500",
+              subY,
+            );
+
+            activeY = subY + subHeight;
+          }
+
+          if (layoutType === "headline_body" || layoutType === "full") {
+            const bodyText = document.getElementById("bodyInput").value;
+            const bodyY =
+              formatKey === "16:9" && align === "left"
+                ? layoutSpecs.body.y
+                : Math.max(layoutSpecs.body.y, activeY + 32);
+
+            renderTextElement(
+              ctx,
+              bodyText,
+              layoutSpecs.body,
+              align,
+              textColor,
+              "400",
+              bodyY,
+            );
+          }
+        }
+
+        const tagText = document.getElementById("tagInput").value;
+
+        renderTextElement(
+          ctx,
+          tagText,
+          layoutSpecs.tag,
+          align,
+          textMuted,
+          "500",
+        );
 
         checkClipboardCopySupport();
       }
@@ -464,7 +746,9 @@
         darkModeMediaQuery.addListener(render);
       }
 
-      document.addEventListener("DOMContentLoaded", render);
+      document.addEventListener("DOMContentLoaded", () => {
+        handlePresetChange();
+      });
     </script>
   </body>
 </html>
